@@ -1,37 +1,31 @@
-name: Release
+name: elease
 
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
+
+permissions:
+  contents: write
+
 jobs:
-  build:
-    permissions: write-all
+  release:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Archive repository
+        run: zip -r ${{ github.ref_name }}.zip . -x "*.git*"
 
-      - name: "Tar files"
-        run: tar -czvf ${{ github.ref_name }}.tar.gz --exclude='.git*' .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      # 3. Создаем релиз и загружаем архив
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          if-no-files-found: error
-          path: ./${{ github.ref_name }}.tar.gz
-          name: ${{ github.ref_name }}.tar.gz
-
-      - name: Changelog
-        uses: scottbrenner/generate-changelog-action@master
-        id: Changelog
-        env:
-          REPO: ${{ github.repository }}
-
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: ${{ steps.Changelog.outputs.changelog}}
-          artifacts: ./${{ github.ref_name }}.tar.gz
+          files: ${{ github.ref_name }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
