@@ -13,14 +13,14 @@ jobs:
 
 
       - name: "Tar files"
-        run: tar -czvf ${{ github.action_ref }}.tar.gz --exclude='.git*' ${{ github.workspace }}
+        run: tar -czvf ${{ github.ref_name }}.tar.gz --exclude='.git*' ${{ github.workspace }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          path: ./${{ github.action_ref }}.tar.gz
-          name: ${{ github.action_ref }}.tar.gz
+          path: ./${{ github.ref_name }}.tar.gz
+          name: ${{ github.ref_name }}.tar.gz
 
       - name: Changelog
         uses: scottbrenner/generate-changelog-action@master
@@ -31,7 +31,7 @@ jobs:
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.action_ref }}
-          name: Release ${{ github.action_ref }}
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: ${{ steps.Changelog.outputs.changelog}}
-          artifacts: ./${{ github.action_ref }}.tar.gz
+          artifacts: ./${{ github.ref_name }}.tar.gz
