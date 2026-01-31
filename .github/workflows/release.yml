@@ -19,19 +19,19 @@ jobs:
           fetch_all_tags: true
 
       - name: "Tar files"
-        run: tar -czvf ${{ steps.tag_version.outputs.new_tag }}.tar.gz --exclude='.git*' -C target/release ${{ github.workspace }}
+        run: tar -czvf ${{ github.action_ref }}.tar.gz --exclude='.git*' -C target/release ${{ github.workspace }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          path: ./${{ steps.tag_version.outputs.new_tag }}.tar.gz
-          name: render-deploy-linux.tar.gz
+          path: ./${{ github.action_ref }}.tar.gz
+          name: ${{ github.action_ref }}.tar.gz
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          tag: ${{ github.action_ref }}
+          name: Release ${{ github.action_ref }}
           body: ${{ steps.tag_version.outputs.changelog }}
-          artifacts: ./render-deploy-linux.tar.gz
+          artifacts: ./${{ github.action_ref }}.tar.gz
