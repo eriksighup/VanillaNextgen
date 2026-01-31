@@ -11,15 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          fetch_all_tags: true
 
       - name: "Tar files"
-        run: tar -czvf ${{ github.action_ref }}.tar.gz --exclude='.git*' -C target/release ${{ github.workspace }}
+        run: tar -czvf ${{ github.action_ref }}.tar.gz --exclude='.git*' ${{ github.workspace }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -28,10 +22,16 @@ jobs:
           path: ./${{ github.action_ref }}.tar.gz
           name: ${{ github.action_ref }}.tar.gz
 
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.action_ref }}
           name: Release ${{ github.action_ref }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: ${{ steps.Changelog.outputs.changelog}}
           artifacts: ./${{ github.action_ref }}.tar.gz
